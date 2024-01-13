@@ -26,16 +26,15 @@ public class TransacaoService {
 
         Map<String, TransacaoReport> reportMap = new LinkedHashMap<>();
         transacoes.forEach(transacao -> {
-            var tipoTransacao = TipoTransacao.findByTipo(transacao.tipo());
             String nomeDaLoja = transacao.nomeDaLoja();
-            BigDecimal valor = transacao.valor().multiply(tipoTransacao.getSinal());
+            BigDecimal valor = transacao.valor();
 
             reportMap.compute(nomeDaLoja, (key, existingReport) -> {
                var report = (existingReport != null) ? existingReport :
                new TransacaoReport(key, BigDecimal.ZERO, new ArrayList<>());
 
                transacao.withValor(valor);
-               return report.addTotal(valor).addTransacao(transacao.withValor(valor));
+               return report.addTotal(valor).addTransacao(transacao);
             });
         });
 

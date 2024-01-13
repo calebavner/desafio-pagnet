@@ -2,6 +2,7 @@ package backendcnab.config;
 
 import backendcnab.model.Transacao;
 import backendcnab.model.TransacaoCNAB;
+import backendcnab.model.enums.TipoTransacao;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -83,9 +84,14 @@ public class BatchConfig {
   @Bean
   ItemProcessor<TransacaoCNAB, Transacao> processor() {
     return item -> {
+      var tipoTransacao = TipoTransacao.findByTipo(item.tipo());
+      var valorNormalizado = item.valor()
+          .divide(new BigDecimal(100))
+          .multiply(tipoTransacao.getSinal());
+
       Transacao t = new Transacao(
         null, item.tipo(), null,
-        item.valor().divide(BigDecimal.valueOf(100)), item.cpf(),
+        valorNormalizado, item.cpf(),
         item.cartao(), null, item.donoDaLoja().trim(), item.nomeDaLoja().trim())
         .withData(item.data())
         .withHora(item.hora());
